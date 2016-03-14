@@ -1,0 +1,60 @@
+<div class="container-fluid">
+  <div class="row">
+  <div class="col-md-10">
+    <form name="weatherPlace">
+      <label>City :
+        <input type="text" class = "input_place" ng-model="city" id="placeInput" name="placeInput"
+               ng-pattern="validInputPattern" required ng-trim="true"></input>
+        <button class="btn btn-primary get_data" ng-click="refreshData()" ng-disabled="weatherPlace.placeInput.$invalid">Get Weather</button>
+      </label>
+      <div role="alert">
+        <span class="error" ng-show="weatherPlace.placeInput.$error.required">
+          No place to get weather entered.</span>
+        <span class="error" ng-show="weatherPlace.placeInput.$error.pattern">
+          Entered information is not valid.</span>
+      </div>
+    </form>
+  </div>
+    <div class="col-md-10">
+    <span ng-if="todayWeatherReady">
+        <div class = "row">
+            <span class="place_name">{{todayWeather.name+','+todayWeather.sys.country}}</span>&nbsp;<img ng-src="{{'http://www.geognos.com/api/en/countries/flag/'+todayWeather.sys.country+'.png'}}" width="30" height="15"/>
+        </div>
+        <div class = "row">
+         Currenlty : <span class="weather_descr" ng-repeat="weather in todayWeather.weather"><img ng-src="{{'http://openweathermap.org/img/w/'+weather.icon+'.png'}}" alt="{{weather.main}}"  width="35" height="20"/>{{weather.description}};</span>
+        </div>
+        <div class = "row">
+            <span class = "temp_shape">{{todayWeather.main.temp}}&deg;C</span> temperature from {{todayWeather.main.temp_min}}&deg;C to {{todayWeather.main.temp_max}}&deg;C, wind {{todayWeather.wind.speed}} m/s, 
+               clouds {{todayWeather.clouds.all}}, {{todayWeather.main.pressure}} hpa
+        </div>
+    </span>
+    <span ng-if="!todayWeatherReady">
+        <div class="row">
+            {{todayWeatherErrorMes}}
+        </div>
+    </span>
+    <span ng-if="weekendWeatherReady">
+        <div class = "row">
+         The next weekend weather will be : <span class="weather_descr" ng-repeat="weather in weekendWeather.weather"><img ng-src="{{'http://openweathermap.org/img/w/'+weather.icon+'.png'}}" alt="{{weather.main}}"  width="35" height="20"/>{{weather.description}};</span>
+        </div>
+        <div class = "row">
+            <span class = "tempshape">{{weekendWeather.main.temp}}&deg;C</span> temperature from {{weekendWeather.main.temp_min}}&deg;C to {{weekendWeather.main.temp_max}}&deg;C, wind {{weekendWeather.wind.speed}} m/s, 
+               clouds {{weekendWeather.clouds.all}}, {{weekendWeather.main.pressure}} hpa
+        </div>
+    </span>
+    <span ng-if="!weekendWeatherReady">
+        <div class = "row">
+        {{weekendWeatherErrorMes}}
+        </div>
+    </span>
+    <span ng-if="todayWeatherReady">   
+        <div class="row">
+        Geo Coords: <span class="place_coord">[{{todayWeather.coord.lon +' , '+ todayWeather.coord.lat}}]</span>
+        </div>
+    </span>
+  </div>
+  <div class="row">
+    <div class="col-md-10">
+    </div>
+  </div>
+</div>

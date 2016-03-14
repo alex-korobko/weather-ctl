@@ -1,0 +1,49 @@
+@temp_shape_padding : 10px;
+@temp_shape_corner_radius: 35px;
+@place_color : #D2691E;
+@weather_color:  #2F4F4F;
+@input_place_corner_radius:5px;
+@get_data_corner_radius: 10px;
+
+.place_name {
+  color : @place_color;
+  font-weight : bold;
+}
+
+.place_coord {
+ color : @place_color;
+}
+
+.weather_descr {
+   font-weight : bold;
+   font-style: italic;
+   color : @weather_color;
+}
+
+.temp_shape{
+  text-align : center;
+  background-color : @weather_color;
+  height : @temp_shape_corner_radius *2.3;
+  border-radius : @temp_shape_corner_radius;
+  color : white;
+  font-weight : bold;
+  text-align : center;
+  padding-left : @temp_shape_padding;
+  padding-right : @temp_shape_padding;   
+}
+
+.input_place {
+   border-radius : @input_place_corner_radius;
+   border-style: solid;
+   border-width: 1px;
+   border-color : black;
+}
+
+.get_data {
+   margin:5px;
+   border-radius : @get_data_corner_radius;
+   border-style: solid;
+   border-width: 1px;
+   background-color: transparent;
+   border-color : black;
+}
