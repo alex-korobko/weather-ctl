@@ -30,7 +30,7 @@ describe('The WeatherSrvTest', function() {
         //act
         var result = service.getCurrentWeatherData(cityName);
         //assert
-        expect(result).to.equal('todayParis.json?callback=JSON_CALLBACK');
+        expect(result).to.equal('todayParis');
   });
   
   it('should properly construct url and return data for the weekend weather ', function() {
@@ -40,6 +40,6 @@ describe('The WeatherSrvTest', function() {
         //act
         var result = service.getWeekendWeatherData(cityName);
         //assert
-        expect(result).to.equal('weekendAmsterdam.json?callback=JSON_CALLBACK');
+        expect(result).to.equal('weekendAmsterdam');
   });
 });
