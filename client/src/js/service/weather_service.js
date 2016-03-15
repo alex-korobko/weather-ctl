@@ -19,5 +19,5 @@ module.exports = function($http, TodayWeatherInfoUrl, WeekendWeatherInfoUrl) {
 
     function getServiceUrl(serviceUrl, city)
     {
-        return serviceUrl + city + '.json?callback=JSON_CALLBACK';
+        return serviceUrl + city;
     }
