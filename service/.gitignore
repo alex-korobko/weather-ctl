@@ -1,0 +1,7 @@
+packages
+
+# vim tmp files
+*.swp
+*.un~
+# VS helper files
+*.suo

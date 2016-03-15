@@ -1,0 +1,10 @@
+bin
+obj
+bootstrap*
+
+# vim tmp files
+*.swp
+*.un~
+#VS helper files
+*.suo
+*.csproj.user
