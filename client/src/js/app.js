@@ -9,8 +9,8 @@ require('angular-route');
 
 var app = angular.module('weatherControl', [ 'ngRoute' ]);
 
-app.constant('TodayWeatherInfoUrl', '/todayWeather');
-app.constant('WeekendWeatherInfoUrl', '/weekendWeather');
+app.constant('TodayWeatherInfoUrl', '/TodayWeatherInfo/');
+app.constant('WeekendWeatherInfoUrl', '/NextWeekendWeatherInfo/');
 app.constant('ValidInputPattern', '\\d+');
 
 require('./service');
