@@ -6,27 +6,21 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Newtonsoft.Json;
 
 namespace service.Controllers
 {
-    public class ServiceController : ApiController
+    public class ServiceApiController : ApiController
     {
         #region constants
+        static private string dataProviderUrl = "http://api.openweathermap.org/";
         static private string regexCityName = "^[a-zA-Z]+(?:[\\s-][a-zA-Z]+)*(,[a-zA-Z]{2,3})*$";
         static private string regexCityZip = "^\\d+,[a-zA-Z]{2,3}$";
-        static private string regexCityId = "^\\d+{2,10}$";
+        static private string regexCityId = "^(\\d+){2,10}$";
         static private string apiKey = ""; //TODO add API key back after checkout
         #endregion
-        static private WeatherCache _currentWeatherCache;
-        static private WeatherCache _weekendWeatherCache;
-
-
-        static ServiceController()
-        {
-            //TODO Move to a service locator of a DI container (add Unity?)
-            _currentWeatherCache = new WeatherCache();
-            _weekendWeatherCache = new WeatherCache();
-        }
+        static private WeatherCache _currentWeatherCache = new WeatherCache();
+        static private WeatherCache _weekendWeatherCache = new WeatherCache();
 
 #region Buld request URL to openweathermap.org 
         private static bool TryBuildCurrentWeatherUrlAsCityName(string cityInfo, out string url)
@@ -97,22 +91,49 @@ namespace service.Controllers
         }
 #endregion
 
-        private static async Task GetCurrentWeatherFromDataSource(string url)
+        private static async Task<string> GetWeatherFromDataSource(string url)
         {
+            string result=null;
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("http://api.openweathermap.org/");
+                client.BaseAddress = new Uri(dataProviderUrl);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 
-                HttpResponseMessage response = await client.GetAsync("api/products/1");
+                HttpResponseMessage response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
+                    result = await response.Content.ReadAsStringAsync();
                 }
+            }
+            return result;
+        }
+
+        private static void GetDataFromJsonResponse(string cityInfo, string response, WeatherCache cache)
+        {
+            var results = JsonConvert.DeserializeObject<dynamic>(response);
+            var sysData = results.sys;
+            var coord = results.coord;
+            string cityName = sysData.Name;
+            string cityId = sysData.id;
+            string cityCountry = sysData.country;
+            string lon = coord.lon;
+            string lat = coord.lat;
+            
+            Int64 newId;
+            if (Int64.TryParse(cityId, out newId))
+            {
+                //updating cache
+                cache.SetResponse(newId, response);
+                //updating City Locator
+                CityIdLocator.AddCityIdLocation(cityInfo, newId); //user request, may be zip, name only etc
+                CityIdLocator.AddCityIdLocation(cityName + "," + cityCountry, newId); //city by name with country
+                CityIdLocator.AddCityIdLocation("lon="+lon+",lat="+lat, newId); //geo coord in format lon=-12.5,lat=45.8
             }
         }
 
-        public IHttpActionResult TodayWeatherInfo(string cityInfo)
+        [HttpGet]
+        public async Task<IHttpActionResult> TodayWeatherInfo(string cityInfo)
         {
             string weatherResponse;
             long cityId;
@@ -122,34 +143,26 @@ namespace service.Controllers
                 {
                     return Ok(weatherResponse);
                 }
-                else
-                {
-                    GetCurrentWeatherFromDataSource(BuildCurrentWeatherUrlAsCityId(cityId)).Wait();
-                }
             }
-            else {
-                string requestUrl;
-                if (TryBuildCurrentWeatherUrl(cityInfo, out requestUrl))
+
+            string requestUrl;
+            if (TryBuildCurrentWeatherUrl(cityInfo, out requestUrl))
+            {
+                string responseBody = await GetWeatherFromDataSource(requestUrl);
+                if (responseBody == null)
                 {
-                    GetCurrentWeatherFromDataSource(requestUrl).Wait();
-                }
-                else
-                { 
                     //TODO return JSON packet with error description
                     return NotFound();
                 }
+                GetDataFromJsonResponse(cityInfo, responseBody, _currentWeatherCache);
+                return Ok(responseBody);
             }
-            //TODO return JSON packet with error description
-            return NotFound();
+            else
+            { 
+                //TODO return JSON packet with error description
+                return NotFound();
+            }
         }
 
-        public async Task<HttpResponseMessage> Post(HttpRequestMessage request)
-        {
-            var jsonString = await request.Content.ReadAsStringAsync();
-
-            // TODO processing of request
-
-            return new HttpResponseMessage(HttpStatusCode.Created);
-        }
     }
 }
